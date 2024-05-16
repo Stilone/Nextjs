@@ -1,0 +1,26 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {                                        // дополнительный набор правил
+    "semi":"off",                                   // выключаем стандартное правило точки с запятой
+    "@typescript-eslint/semi": [                    // используем правило точки с запятой typescript-eslint
+      "warn"                                        // если нет точки с запятой показать warn 
+    ],
+    "@typescript-eslint/no-empty-interface": [      // если задаем пустой интерфейс eslint
+      "error",                                      // если есть пустой интерфейс показать error
+      {
+        "allowSingleExtends": true,                  // исключение если наш интерфейс использует extends
+        "no-undef": true
+      }
+    ]
+  },
+  "extends": [
+    "eslint:recommended",                            //стандартные рекомендованные правила 
+    "plugin:@typescript-eslint/eslint-recommended",  //стандартные рекомендованные правила eslint
+    "plugin:@typescript-eslint/recommended",
+    "plugin: react-hooks/recommended"
+  ]
+}
