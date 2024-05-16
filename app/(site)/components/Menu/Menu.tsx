@@ -1,24 +1,37 @@
+"use client"
 import styles from "./Menu.module.css";
 import cn from "classnames";
 import { getMenu } from "../../../../api/menu";
-import { FirstLevelMenuItem, PageItem } from "../../../../interfaces/menu.interface";
-import CoursesIcon from "./icons/courses.svg"
-import ServicesIcon from "./icons/services.svg"
-import BooksIcon from "./icons/books.svg"
-import ProductsIcon from "./icons/products.svg"
+import { FirstLevelMenuItem, MenuItem, PageItem } from "../../../../interfaces/menu.interface";
 import { TopLevelCategory } from "../../../../interfaces/page.interface";
 import Link from "next/link";
+import { usePathname } from "next/navigation"; // Importing usePathname hook
+import { useEffect, useState } from "react";
+import { firstLevelMenu } from "../../../../helpers/helpers";
 
-const firstLevelMenu: FirstLevelMenuItem[] = [
-    {route: "courses", name: "Курсы", icon: <CoursesIcon />, id: TopLevelCategory.Courses},
-    {route: "services", name: "Сервисы", icon: <ServicesIcon />, id: TopLevelCategory.Services},
-    {route: "books", name: "Книги", icon: <BooksIcon />, id: TopLevelCategory.Books},
-    {route: "products", name: "Продукты", icon: <ProductsIcon />, id: TopLevelCategory.Products},
-]
 
-export default async function Menu() {
-    const menuRequest =  await getMenu(0);
+export default function Menu() { // Changed from async function to regular function
+    const [menuRequest, setMenuRequest] = useState<MenuItem[]>([]); // Using useState hook to store menu data
+    const pathname = usePathname();
+   
+    useEffect(() => {
+        const fetchMenu = async () => {
+            const menuData = await getMenu(0);
+            setMenuRequest(menuData);
+        };
 
+        fetchMenu();
+    }, []); // Empty dependency array to fetch menu only once
+
+    const openSecondLevel = (secondCategory: string) => {
+        setMenuRequest(menuRequest.map(m => {
+            if(m._id.secondCategory == secondCategory) {
+                m.isOpened = !m.isOpened;
+            }
+            return m;
+        }))
+    }
+ 
     const buildFirstLevel = () => {
         return (
             <>
@@ -26,13 +39,13 @@ export default async function Menu() {
                     <div key={menu.route}>
                         <Link href={`/${menu.route}`}>
                             <div className={cn(styles.firstLevel, {
-                                [styles.firstLevelActive]: menu.id == TopLevelCategory.Courses
+                                [styles.firstLevelActive]: menu.id === TopLevelCategory.Courses
                             })}>
                                 {menu.icon}
                                 <span>{menu.name}</span>
                             </div>
                         </Link>
-                        {menu.id == TopLevelCategory.Courses && buildSecondLevel(menu)}
+                        {menu.id === TopLevelCategory.Courses && buildSecondLevel(menu)}
                     </div>
                 ))}
             </>
@@ -42,16 +55,21 @@ export default async function Menu() {
     const buildSecondLevel = (menu: FirstLevelMenuItem) => {
         return (
             <div className={styles.secondBlock}>
-                {menuRequest.map(m => (
-                    <div key={m._id.secondCategory}>
-                        <div className={styles.secondLevel}>{m._id.secondCategory}</div>
-                        <div className={cn(styles.secondLevelBlock, {
-                            [styles.secondLevelBlockOpened]: m.isOpened
-                        })}>
-                            {m._id.secondCategory == "Аналитика" && buildThirdLevel(m.pages, menu.route)}
+                {menuRequest.map(m => {
+                    if (m.pages.map(p => p.alias).includes(pathname.split("/")[2])) {
+                        m.isOpened = true
+                    }
+                    return (
+                        <div key={m._id.secondCategory}>
+                            <div className={styles.secondLevel} onClick={() => openSecondLevel(m._id.secondCategory)}>{m._id.secondCategory}</div>
+                            <div className={cn(styles.secondLevelBlock, {
+                                [styles.secondLevelBlockOpened]: m.isOpened
+                            })}>
+                                {buildThirdLevel(m.pages, menu.route)}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         );
     };
@@ -61,7 +79,7 @@ export default async function Menu() {
             pages.map(p => (
                 <Link key={p._id} href={`/${route}/${p.alias}`}>
                     <div className={cn(styles.thirdLevel, {
-                    [styles.thirdLevelActive]: false
+                    [styles.thirdLevelActive]: `/${route}/${p.alias}` === pathname
                 })}>
                     {p.category}
                     </div>

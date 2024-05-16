@@ -1,3 +1,9 @@
-.p {
-    margin: 0;
+.sideBar {
+    display: grid;
+    align-content: start;
+    gap: 20px;
+}
+
+.logo {
+    margin-top: 34px;
 }

@@ -1,12 +1,14 @@
-import React from "react";
+import React, { Suspense } from "react";
 import styles from "./page.module.css"
-import { getMenu } from "../../api/menu";
+import Loading from "./[...alias]/loading";
+
+
 
 export default async function Home() {
 
-  return ( 
-    <main className={styles.main}>
-        Главная страница
-    </main>
+  return (
+        <main className={styles.main}>
+            Главная страница
+        </main>
   );
 }

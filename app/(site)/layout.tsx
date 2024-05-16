@@ -3,7 +3,6 @@ import { Noto_Sans_KR } from "next/font/google";
 import styles from "./page.module.css"
 import "./globals.css";
 import { Footer, Header, Sidebar } from "./components";
-import { AppContextProvider, IAppContext } from "../../context/app.context";
 
 const noto = Noto_Sans_KR({ subsets: ["latin"] });
 
